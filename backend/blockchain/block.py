@@ -1,12 +1,16 @@
 import time
 
 from backend.util.crypto_hash import crypto_hash
+from backend.util.hex_to_binary import hex_to_binary
+from backend.config import MINE_RATE
 
 GENESIS_DATA = {
-    'timestamp': 1,
-    'last_hash': 'genesis_last_hast',
-    'hash': 'genesis_hash',
-    'data': []
+    'timestamp' : 1,
+    'last_hash' : 'genesis_last_hast',
+    'hash'      : 'genesis_hash',
+    'data'      : [],
+    'difficulty': 3,
+    'nonce'     : 'genesis_nonce'
 }
 
 class Block:
@@ -14,19 +18,23 @@ class Block:
     Block: a unit of storage
     Store transactions in a blockchain that supports a cryptocurrency 
     """
-    def __init__(self,  timestamp, last_hash, hash, data) -> None:
+    def __init__(self,  timestamp, last_hash, hash, data, difficulty, nonce):
         self.timestamp  = timestamp
         self.last_hash  = last_hash
         self.hash       = hash
         self.data       = data
-        
+        self.difficulty = difficulty
+        self.nonce      = nonce
+                
     def __repr__(self) -> str:
         return (
                 'Block('
-                f'timestamp: {self.timestamp},'
-                f'last_hash: {self.last_hash},'
-                f'hash: {self.hash},'
-                f'data: {self.data})'
+                f'timestamp: {self.timestamp}, '
+                f'last_hash: {self.last_hash}, '
+                f'hash: {self.hash}, '
+                f'data: {self.data}), '
+                f'difficulty: {self.difficulty}), '
+                f'nonce: {self.nonce}) '
             )
         
     @staticmethod
@@ -36,23 +44,36 @@ class Block:
         """
         timestamp   = time.time_ns()
         last_hash   = last_block.hash
-        hash        = crypto_hash(timestamp, last_hash, data)
+        difficulty  = Block.adjust_difficulty(last_block=last_block, new_timestamp=timestamp)
+        nonce       = 0
         
-        return Block(timestamp=timestamp, last_hash=last_hash, hash=hash, data=data)
+        hash        = crypto_hash(timestamp, last_hash, data, difficulty, nonce)
+        
+        while hex_to_binary(hash)[0:difficulty] != '0' * difficulty:
+            nonce += 1 
+            timestamp   = time.time_ns()
+            hash        = crypto_hash(timestamp, last_hash, data, difficulty, nonce)
+        
+        return Block(timestamp=timestamp, last_hash=last_hash, hash=hash, data=data, difficulty=difficulty, nonce=nonce)
 
     @staticmethod
     def genesis():
         """
         Generate the genesis block
         """
-        # return Block(
-        #     GENESIS_DATA['timestamp'],
-        #     GENESIS_DATA['last_hash'],
-        #     GENESIS_DATA['hash'],
-        #     GENESIS_DATA['data'],
-        # )
         return Block(**GENESIS_DATA)
         
+    @staticmethod
+    def adjust_difficulty(last_block, new_timestamp):
+        """
+        Calculate the adjusted difficulty according to the MINE_RATE
+        """
+        if (new_timestamp - last_block.timestamp) < MINE_RATE:
+            return last_block.difficulty + 1
+        if (last_block.difficulty -1 ) > 0:
+            return last_block.difficulty - 1
+        return 1
+    
 def main():
     print(f'block.py __name__: {__name__}')
     
