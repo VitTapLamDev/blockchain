@@ -1,1 +1,5 @@
 pytest
+flask
+pubnub==4.1.6
+requests
+cryptography
