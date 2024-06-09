@@ -7,8 +7,8 @@ from pubnub.callbacks import SubscribeCallback
 from pubnub.pubnub import PubNub
 
 pnconfig = PNConfiguration()
-pnconfig.subscribe_key = 'sub-c-96457552-07a5-4145-96f8-d649593f032f'
-pnconfig.publish_key = 'pub-c-4fbb1975-061f-4c72-9742-9fe52f1ef54a'
+pnconfig.subscribe_key = ''
+pnconfig.publish_key = ''
 # pnconfig.user_id = 'vietnguyen_kma'
 
 CHANNELS = {
