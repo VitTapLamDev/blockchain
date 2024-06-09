@@ -1,4 +1,5 @@
 import time
+import os
 
 from backend.blockchain.block import Block
 
@@ -6,9 +7,16 @@ from pubnub.pnconfiguration import PNConfiguration
 from pubnub.callbacks import SubscribeCallback
 from pubnub.pubnub import PubNub
 
+from os.path import join, dirname
+
+from dotenv import load_dotenv
+
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+
 pnconfig = PNConfiguration()
-pnconfig.subscribe_key = ''
-pnconfig.publish_key = ''
+pnconfig.subscribe_key = os.environ.get('SUBSCRIBE_KEY')
+pnconfig.publish_key = os.environ.get('PUBLISH_KEY')
 # pnconfig.user_id = 'vietnguyen_kma'
 
 CHANNELS = {
